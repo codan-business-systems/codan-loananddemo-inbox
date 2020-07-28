@@ -1,0 +1,32 @@
+<core:FragmentDefinition xmlns:core="sap.ui.core" xmlns="sap.m" xmlns:form="sap.ui.layout.form" xmlns:layout="sap.ui.layout"
+	xmlns:sap.ca.ui="sap.ca.ui" xmlns:suite="sap.suite.ui.commons">
+	<!-- The following controls were copied from the parent view -->
+	<ObjectHeader xmlns="sap.m"
+		backgroundDesign="{path: 'detail&gt;/SapUiTheme', formatter:'cross.fnd.fiori.inbox.Conversions.formatterThemeBasedBackgroundColor'}"
+		title="{parts: [{path: 'detail&gt;/TaskTitle'}, {path: 'detail&gt;/CustomAttributeData'}], formatter: 'cross.fnd.fiori.inbox.Conversions.formatterTaskTitle'}"
+		titleLevel="H3" 
+		visible="{= !${detail&gt;/showGenericComponent}}">
+		<attributes>
+			<ObjectAttribute id="ARuserName" text="{parts: [{path: 'CustomAttributeData'}], formatter:'.getActualCreatedBy' }"/>
+			<!--<ObjectAttribute text="{path: 'detail&gt;/CompletionDeadLine', formatter:'cross.fnd.fiori.inbox.Conversions.formatterDueDate'}"/>-->
+			<ObjectAttribute text="{path: 'detail&gt;/CreatedOn', formatter:'cross.fnd.fiori.inbox.Conversions.formatterCreatedDate'}"/>
+			<ObjectAttribute text="{parts: [{path: 'CustomAttributeData'}], 
+						formatter:'.getSalesOrderNumber' }"
+				/>
+			<ObjectAttribute text="{parts: [{path: 'CustomAttributeData'}], 
+						formatter:'.getPurchaseOrderNumber' }"
+				/>
+			<ObjectAttribute
+				text="{parts: [{path: 'detail&gt;/ResumeOn'}, {path: 'detail&gt;/Status'}], formatter:'cross.fnd.fiori.inbox.Conversions.formatterResumeOnText'}"/>
+			<ObjectAttribute
+				text="{parts: [{path: 'detail&gt;/CustomAttributeData'}, {path: 'detail&gt;/CustomAttributeDefinitionData'}], formatter:'cross.fnd.fiori.inbox.Conversions.formatterDetailCustomObjectAttributeValue'}"/>
+		</attributes>
+		<firstStatus>
+			<ObjectStatus
+				text="{parts: [{path: 'CustomAttributeData'}], 
+						formatter:'.getStatusText' }" state="Success"></ObjectStatus>
+		</firstStatus>
+		<secondStatus>
+		</secondStatus>
+	</ObjectHeader>
+</core:FragmentDefinition>

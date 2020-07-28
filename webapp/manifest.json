@@ -1,0 +1,72 @@
+{
+	"_version": "1.1.0",
+	"sap.app": {
+		"_version": "1.1.0",
+		"id": "cross.fnd.fiori.inbox.LoanAndDemoInbox",
+		"type": "application",
+		"applicationVersion": {
+			"version": "1.0.0"
+		},
+		"title": "Loan and Demo Approvals"
+	},
+	"sap.ui": {
+		"_version": "1.1.0",
+		"technology": "UI5",
+		"icons": {
+			"icon": "sap-icon://approvals",
+			"favIcon": "./resources/sap/ca/ui/themes/base/img/favicon/Approve_Requests.ico"
+		},
+		"deviceTypes": {
+			"desktop": true,
+			"tablet": true,
+			"phone": true
+		},
+		"supportedThemes": [
+			"sap_hcb",
+			"sap_bluecrystal"
+		]
+	},
+	"sap.ui5": {
+		"_version": "1.1.0",
+		"dependencies": {
+			"minUI5Version": "1.38.9"
+		},
+		"extends": {
+			"component": "cross.fnd.fiori.inbox",
+			"extensions": {
+				"sap.ui.viewExtensions": {
+					"cross.fnd.fiori.inbox.view.S2": {
+						"CustomerExtensionForObjectListItem": {
+							"className": "sap.ui.core.Fragment",
+							"fragmentName": "cross.fnd.fiori.inbox.LoanAndDemoInbox.view.S2_CustomerExtensionForObjectListItemCustom",
+							"type": "XML"
+						}
+					},
+					"cross.fnd.fiori.inbox.view.S3": {
+						"CustomerExtensionForObjectHeader": {
+							"className": "sap.ui.core.Fragment",
+							"fragmentName": "cross.fnd.fiori.inbox.LoanAndDemoInbox.view.S3_CustomerExtensionForObjectHeaderCustom",
+							"type": "XML"
+						}
+					}
+				},
+				"sap.ui.controllerExtensions": {
+					"cross.fnd.fiori.inbox.view.S2": {
+						"controllerName": "cross.fnd.fiori.inbox.LoanAndDemoInbox.view.S2Custom"
+					},
+					"cross.fnd.fiori.inbox.view.S3": {
+						"controllerName": "cross.fnd.fiori.inbox.LoanAndDemoInbox.view.S3Custom"
+					}
+				}
+			}
+		},
+		"contentDensities": {
+			"compact": true,
+			"cozy": true
+		}
+	},
+	"sap.platform.abap": {
+		"uri": "/sap/bc/ui5_ui5/sap/zsd_ld_inbox/webapp",
+		"_version": "1.1.0"
+	}
+}

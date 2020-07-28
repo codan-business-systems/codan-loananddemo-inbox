@@ -1,0 +1,30 @@
+<core:FragmentDefinition xmlns:core="sap.ui.core" xmlns="sap.m">
+	<ObjectListItem xmlns="sap.m" id="MAIN_LIST_ITEM" type="{device&gt;/listItemType}" press="_handleItemPress" class="sapMTextBold"
+		title="{parts: [{path: 'TaskTitle'}, {path: 'CustomAttributeData'}], formatter: 'cross.fnd.fiori.inbox.Conversions.formatterTaskTitle'}"
+		intro="{parts: [{path: 'TaskSupports/Release'}, {path: 'SupportsRelease'}], formatter: 'cross.fnd.fiori.inbox.Conversions.formatterStatusForReserved'}">
+		<attributes>
+			<ObjectAttribute id="ATTR1" text="{parts: [{path: 'CustomAttributeData'}], 
+						formatter:'.getActualCreatedBy' }"/>
+			<ObjectAttribute id="ATTR2" text="{parts: [{path: 'CustomAttributeData'}], 
+						formatter:'.getSalesOrderNumber' }"
+				/>
+			<ObjectAttribute id="ATTR3" text="{path: 'SubstitutedUserName', formatter:'cross.fnd.fiori.inbox.Conversions.formatterSubstitutedText'}"/>
+			<ObjectAttribute id="ATTR4"
+				text="{parts: [{path: 'CompletedOn'}, {path: 'Status'}], formatter:'cross.fnd.fiori.inbox.Conversions.formatterCompletedDate'}"/>
+			<ObjectAttribute id="ATTR5"
+				text="{parts: [{path: 'ResumeOn'}, {path: 'Status'}], formatter:'cross.fnd.fiori.inbox.Conversions.formatterResumeOnText'}"/>
+			<ObjectAttribute id="ATTR6"
+				text="{parts: [{path: 'CustomAttributeData'}, {path: 'taskDefinitionsModel&gt;/'}], formatter: 'cross.fnd.fiori.inbox.Conversions.formatterListCustomObjectAttributeValue'}"/>
+		</attributes>
+		<firstStatus>
+			<ObjectStatus id="STAT1"
+				text="{parts: [{path: 'CustomAttributeData'}], 
+						formatter:'.getStatusText' }" state="Success"></ObjectStatus>
+		</firstStatus>
+		<secondStatus>
+			<ObjectStatus id="STAT2"
+				text="{parts: [{path: 'CompletionDeadLine'}, {path: 'IsOverdue'}], formatter:'cross.fnd.fiori.inbox.Conversions.formatterDeadLineIndicator'}"
+				state="{parts: [{path: 'CompletionDeadLine'}, {path: 'IsOverdue'}], formatter:'cross.fnd.fiori.inbox.Conversions.formatterDeadLineIndicatorState'}"></ObjectStatus>
+		</secondStatus>
+	</ObjectListItem>
+</core:FragmentDefinition>
