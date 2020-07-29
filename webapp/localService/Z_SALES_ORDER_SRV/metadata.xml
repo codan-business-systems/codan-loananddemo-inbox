@@ -1,0 +1,30 @@
+<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx"
+	xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:sap="http://www.sap.com/Protocols/SAPData" Version="1.0">
+	<edmx:DataServices m:DataServiceVersion="2.0">
+		<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="Z_SALES_ORDER_SRV" xml:lang="en" sap:schema-version="1">
+			<EntityType Name="Item" sap:content-version="1">
+				<Key><PropertyRef Name="salesOrderId"/><PropertyRef Name="itemId"/></Key><Property Name="salesOrderId" Type="Edm.String" Nullable="false" MaxLength="10" sap:label="Sales Document" sap:creatable="false"
+					sap:updatable="false" sap:sortable="false" sap:filterable="false"/><Property Name="itemId" Type="Edm.String" Nullable="false" MaxLength="6" sap:label="Item" sap:creatable="false" sap:updatable="false"
+					sap:sortable="false" sap:filterable="false"/><Property Name="material" Type="Edm.String" Nullable="false" MaxLength="18" sap:label="Material" sap:creatable="false" sap:updatable="false"
+					sap:sortable="false" sap:filterable="false"/><Property Name="shortText" Type="Edm.String" Nullable="false" MaxLength="40" sap:label="Description" sap:creatable="false"
+					sap:updatable="false" sap:sortable="false" sap:filterable="false"/><Property Name="targetQty" Type="Edm.Decimal" Nullable="false" Precision="13" Scale="3" sap:unit="targetUom" sap:label="Target quantity"
+					sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/><Property Name="targetUom" Type="Edm.String" Nullable="false" MaxLength="3" sap:label="Target qty UoM" sap:creatable="false"
+					sap:updatable="false" sap:sortable="false" sap:filterable="false" sap:semantics="unit-of-measure"/></EntityType>
+			<EntityType Name="Header" sap:content-version="1">
+				<Key><PropertyRef Name="salesOrderId"/></Key><Property Name="salesOrderId" Type="Edm.String" Nullable="false" MaxLength="10" sap:label="Sales Document" sap:creatable="false"
+					sap:updatable="false" sap:sortable="false" sap:filterable="false"/><Property Name="workitemId" Type="Edm.String" Nullable="false" MaxLength="12" sap:label="ID" sap:creatable="false" sap:updatable="false"
+					sap:sortable="false" sap:filterable="false"/><NavigationProperty Name="ToItems" Relationship="Z_SALES_ORDER_SRV.ToItems" FromRole="FromRole_ToItems" ToRole="ToRole_ToItems"/></EntityType>
+			<Association Name="ToItems" sap:content-version="1"><End Type="Z_SALES_ORDER_SRV.Header" Multiplicity="1" Role="FromRole_ToItems"/><End Type="Z_SALES_ORDER_SRV.Item" Multiplicity="*" Role="ToRole_ToItems"/>
+				<ReferentialConstraint>
+					<Principal Role="FromRole_ToItems"><PropertyRef Name="salesOrderId"/></Principal>
+					<Dependent Role="ToRole_ToItems"><PropertyRef Name="salesOrderId"/></Dependent>
+				</ReferentialConstraint>
+			</Association>
+			<EntityContainer Name="Z_SALES_ORDER_SRV_Entities" m:IsDefaultEntityContainer="true" sap:supported-formats="atom json xlsx"><EntitySet Name="Items" EntityType="Z_SALES_ORDER_SRV.Item" sap:creatable="false" sap:updatable="false" sap:deletable="false"
+				sap:pageable="false" sap:addressable="false" sap:content-version="1"/><EntitySet Name="Headers" EntityType="Z_SALES_ORDER_SRV.Header" sap:creatable="false" sap:updatable="false" sap:deletable="false"
+				sap:pageable="false" sap:addressable="false" sap:content-version="1"/>
+				<AssociationSet Name="ToItemsSet" Association="Z_SALES_ORDER_SRV.ToItems" sap:creatable="false" sap:updatable="false" sap:deletable="false"
+					sap:content-version="1"><End EntitySet="Headers" Role="FromRole_ToItems"/><End EntitySet="Items" Role="ToRole_ToItems"/></AssociationSet>
+			</EntityContainer><atom:link xmlns:atom="http://www.w3.org/2005/Atom" rel="self" href="./sap/Z_SALES_ORDER_SRV/$metadata"/><atom:link xmlns:atom="http://www.w3.org/2005/Atom" rel="latest-version" href="./sap/Z_SALES_ORDER_SRV/$metadata"/></Schema>
+	</edmx:DataServices>
+</edmx:Edmx>

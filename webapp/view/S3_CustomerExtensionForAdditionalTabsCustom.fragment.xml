@@ -1,0 +1,35 @@
+<core:FragmentDefinition xmlns:core="sap.ui.core" xmlns="sap.m" xmlns:form="sap.ui.layout.form" xmlns:layout="sap.ui.layout"
+	xmlns:sap.ca.ui="sap.ca.ui" xmlns:suite="sap.suite.ui.commons">
+	<!-- This extension point can be used to add fields to items -->
+	<!--<IconTabFilter xmlns="sap.m" id="MIBObjectLinksTabFilter_clone" icon="sap-icon://chain-link" tooltip="{i18n>relatedObjects.tooltip}" count="{detail>/ObjectLinksCount}" visible="{ path: 'detail>/TaskSupports/TaskObject', formatter: 'cross.fnd.fiori.inbox.Conversions.formatterVisibilityOfObjectIconTab' }" key="OBJECTLINKS">
+						<core:ExtensionPoint xmlns:core="sap.ui.core" name="CustomerExtensionForObjectLinkTabContent">
+							<core:Fragment fragmentName="cross.fnd.fiori.inbox.frag.ObjectLinks" type="XML"/>
+						</core:ExtensionPoint>
+					</IconTabFilter>-->
+					
+	<IconTabFilter xmlns="sap.m" id="ZSalesItems" icon="sap-icon://activities" tooltip="Sales Order Items" count="{salesOrder>/itemsCount}" key="ZSalesOrderItems">
+		<Table id="salesItems" items="{salesOrder>/items}" width="auto" class="sapUiResponsiveMargin" noDataText="No Valid Line Items">
+			<headerToolbar>
+				<Toolbar>
+					<Title text="Items: {salesOrder>/itemsCount}"/>
+				</Toolbar>
+			</headerToolbar>
+			<columns>
+				<Column><Text text="#"/></Column>
+				<Column><Text text="Part Number"/></Column>
+				<Column><Text text="Part Description"/></Column>
+				<Column><Text text="Quantity"/></Column>
+			</columns>
+			<items>
+				<ColumnListItem>
+					<cells>
+						<ObjectIdentifier title="{salesOrder>itemId}"/>
+						<ObjectIdentifier title="{salesOrder>material}"/>
+						<Text text="{salesOrder>shortText}"/>
+						<ObjectNumber number="{salesOrder>reqQty}" unit="{salesOrder>salesUnit}"/>
+					</cells>
+				</ColumnListItem>
+			</items>
+		</Table>
+	</IconTabFilter>
+</core:FragmentDefinition>

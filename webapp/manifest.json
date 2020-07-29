@@ -7,7 +7,20 @@
 		"applicationVersion": {
 			"version": "1.0.0"
 		},
-		"title": "Loan and Demo Approvals"
+		"title": "Loan and Demo Approvals",
+		"dataSources": {
+			"Z_SALES_ORDER_SRV": {
+				"uri": "/sap/opu/odata/sap/Z_SALES_ORDER_SRV/",
+				"type": "OData",
+				"settings": {
+					"localUri": "localService/Z_SALES_ORDER_SRV/metadata.xml"
+				}
+			}
+		},
+		"sourceTemplate": {
+			"id": "servicecatalog.connectivityComponentForManifest",
+			"version": "0.0.0"
+		}
 	},
 	"sap.ui": {
 		"_version": "1.1.0",
@@ -47,6 +60,11 @@
 							"className": "sap.ui.core.Fragment",
 							"fragmentName": "cross.fnd.fiori.inbox.LoanAndDemoInbox.view.S3_CustomerExtensionForObjectHeaderCustom",
 							"type": "XML"
+						},
+						"CustomerExtensionForAdditionalTabs": {
+							"className": "sap.ui.core.Fragment",
+							"fragmentName": "cross.fnd.fiori.inbox.LoanAndDemoInbox.view.S3_CustomerExtensionForAdditionalTabsCustom",
+							"type": "XML"
 						}
 					}
 				},
@@ -63,6 +81,18 @@
 		"contentDensities": {
 			"compact": true,
 			"cozy": true
+		},
+		"models": {
+			"salesOrderERP": {
+				"type": "sap.ui.model.odata.v2.ODataModel",
+				"settings": {
+					"defaultOperationMode": "Server",
+					"defaultBindingMode": "OneWay",
+					"defaultCountMode": "Request"
+				},
+				"dataSource": "Z_SALES_ORDER_SRV",
+				"preload": true
+			}
 		}
 	},
 	"sap.platform.abap": {
