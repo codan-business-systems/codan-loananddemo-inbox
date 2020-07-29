@@ -43,7 +43,7 @@ sap.ui.controller("cross.fnd.fiori.inbox.LoanAndDemoInbox.view.S2Custom", {
 	},
 	
 	getStatusText: function(aAttr) {
-		return this.getCustomAttribute(aAttr, "statusText") + " (" + this.getCustomAttribute(aAttr, "userStatus") + ")";
+		return this.getCustomAttribute(aAttr, "userStatusText") + " (" + this.getCustomAttribute(aAttr, "userStatus") + ")";
 	}
 
 	/**

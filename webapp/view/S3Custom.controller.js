@@ -47,7 +47,7 @@ sap.ui.controller("cross.fnd.fiori.inbox.LoanAndDemoInbox.view.S3Custom", {
 		return "Purchase Order: " + this.getCustomAttribute(aAttr, "purchaseOrder");
 	},
 	getStatusText: function (aAttr) {
-		return this.getCustomAttribute(aAttr, "statusText") + " (" + this.getCustomAttribute(aAttr, "userStatus") + ")";
+		return this.getCustomAttribute(aAttr, "userStatusText") + " (" + this.getCustomAttribute(aAttr, "userStatus") + ")";
 	},
 
 	handleNavToDetail: function (e) {
