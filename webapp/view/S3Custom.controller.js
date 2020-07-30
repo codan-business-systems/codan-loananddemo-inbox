@@ -9,6 +9,10 @@ sap.ui.controller("cross.fnd.fiori.inbox.LoanAndDemoInbox.view.S3Custom", {
 	 * @memberOf cross.fnd.fiori.inbox.LoanAndDemoInbox.view.S3Custom
 	 */
 	onInit: function () {
+		
+		var view = this.getView(),
+			that = this;
+		
 		cross.fnd.fiori.inbox.view.S3.prototype.onInit.call(this);
 
 		// Instantiate our own model for holding Sales Order Item details
@@ -21,7 +25,12 @@ sap.ui.controller("cross.fnd.fiori.inbox.LoanAndDemoInbox.view.S3Custom", {
 			expenditureMode: false
 		});
 
-		this.getView().setModel(this.oSalesOrderModel, "salesOrder");
+		view.setModel(this.oSalesOrderModel, "salesOrder");
+		
+		view.attachAfterRendering(function() {
+			that.setSalesOrderTabSelected();
+		});
+		
 	},
 
 	/**
@@ -67,6 +76,8 @@ sap.ui.controller("cross.fnd.fiori.inbox.LoanAndDemoInbox.view.S3Custom", {
 		cross.fnd.fiori.inbox.view.S3.prototype.handleNavToDetail.call(this, e);
 
 		this.salesOrderLoaded = this.loadSalesOrderItems(e);
+		
+		this.setSalesOrderTabSelected();
 
 	},
 
@@ -127,6 +138,11 @@ sap.ui.controller("cross.fnd.fiori.inbox.LoanAndDemoInbox.view.S3Custom", {
 				}
 			});
 		});
+	},
+	
+	setSalesOrderTabSelected: function() {
+		var d = this.oTabBar.getItems()[4];
+        this.oTabBar.setSelectedItem(d);
 	}
 
 	/**
