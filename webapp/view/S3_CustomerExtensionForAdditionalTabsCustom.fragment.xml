@@ -8,7 +8,7 @@
 					</IconTabFilter>-->
 					
 	<IconTabFilter xmlns="sap.m" id="ZSalesItems" icon="sap-icon://activities" tooltip="Sales Order Items" count="{salesOrder>/itemsCount}" key="ZSalesOrderItems">
-		<Table id="salesItems" items="{salesOrder>/items}" width="auto" class="sapUiResponsiveMargin" noDataText="No Valid Line Items">
+		<Table id="salesItems" items="{salesOrder>/items}" width="auto" class="sapUiResponsiveMargin" noDataText="No Valid Line Items" busy="{salesOrder>/busy}">
 			<headerToolbar>
 				<Toolbar>
 					<Title text="Items: {salesOrder>/itemsCount}"/>
@@ -19,6 +19,8 @@
 				<Column><Text text="Part Number"/></Column>
 				<Column><Text text="Part Description"/></Column>
 				<Column><Text text="Quantity"/></Column>
+				<!--<Column visible="{salesOrder>/expenditureMode}"><Text text="Standard Cost"/></Column>
+				<Column visible="{salesOrder>/expenditureMode}"><Text text="Ext Std Cost"/></Column>-->
 			</columns>
 			<items>
 				<ColumnListItem>

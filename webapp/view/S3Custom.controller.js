@@ -1,6 +1,7 @@
 sap.ui.controller("cross.fnd.fiori.inbox.LoanAndDemoInbox.view.S3Custom", {
 
 	oSalesOrderModel: {},
+	_sContextPath: "",
 
 	/**
 	 * Called when a controller is instantiated and its View controls (if available) are already created.
@@ -13,7 +14,11 @@ sap.ui.controller("cross.fnd.fiori.inbox.LoanAndDemoInbox.view.S3Custom", {
 		// Instantiate our own model for holding Sales Order Item details
 		this.oSalesOrderModel = new sap.ui.model.json.JSONModel({
 			items: [],
-			itemsCount: 0
+			itemsCount: 0,
+			expenditureApproval: false,
+			busy: false,
+			userStatus: "",
+			expenditureMode: false
 		});
 
 		this.getView().setModel(this.oSalesOrderModel, "salesOrder");
@@ -49,6 +54,13 @@ sap.ui.controller("cross.fnd.fiori.inbox.LoanAndDemoInbox.view.S3Custom", {
 	getStatusText: function (aAttr) {
 		return this.getCustomAttribute(aAttr, "userStatusText") + " (" + this.getCustomAttribute(aAttr, "userStatus") + ")";
 	},
+	getValidToDate: function (aAttr) {
+		return "Valid To: " + this.formatAbapDate(this.getCustomAttribute(aAttr, "validTo"));
+	},
+	
+	formatAbapDate: function (sDate) {
+		return sDate.substr(6,2) + "/" + sDate.substr(4,2) + "/" + sDate.substr(0,4);	
+	},
 
 	handleNavToDetail: function (e) {
 
@@ -60,12 +72,20 @@ sap.ui.controller("cross.fnd.fiori.inbox.LoanAndDemoInbox.view.S3Custom", {
 
 	loadSalesOrderItems: function (e) {
 
-		var t = this,
-			model = this.oSalesOrderModel,
+		var model = this.oSalesOrderModel,
 			erpModel = this.getView().getModel("salesOrderERP"),
-			workitemId = e.getParameter("arguments").InstanceID,
+			args = e.getParameter("arguments"),
+			workitemId = args.InstanceID,
 			filters = [];
-
+			
+		model.setProperty("/busy", true);
+		
+		this._sContextPath = "/" + args.contextPath;
+		
+		var userStatus = this.getCustomAttribute(this.getView().getModel().getProperty(this._sContextPath + "/CustomAttributeData"), "userStatus");
+		model.setProperty("/userStatus", userStatus);
+		model.setProperty("/expenditureMode", userStatus === "EXPA");
+		
 		return new Promise(function (res, rej) {
 			filters.push(new sap.ui.model.Filter({
 				path: "workitemId",
@@ -95,11 +115,14 @@ sap.ui.controller("cross.fnd.fiori.inbox.LoanAndDemoInbox.view.S3Custom", {
 						}
 
 					}
+					
+					model.setProperty("/busy", false); 
 
 					res();
 				},
 				error: function (err) {
-					//TODO
+					model.setProperty("/busy", false); 
+					//TODO - what do these errors look like
 					rej();
 				}
 			});

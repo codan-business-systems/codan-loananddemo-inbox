@@ -16,6 +16,9 @@
 			<ObjectAttribute text="{parts: [{path: 'CustomAttributeData'}], 
 						formatter:'.getPurchaseOrderNumber' }"
 				/>
+			<ObjectAttribute text="{parts: [{path: 'CustomAttributeData'}],
+						formatter:'.getValidToDate' }"
+				/>		
 			<ObjectAttribute
 				text="{parts: [{path: 'detail&gt;/ResumeOn'}, {path: 'detail&gt;/Status'}], formatter:'cross.fnd.fiori.inbox.Conversions.formatterResumeOnText'}"/>
 			<ObjectAttribute
