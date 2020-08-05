@@ -1,7 +1,10 @@
 sap.ui.controller("cross.fnd.fiori.inbox.LoanAndDemoInbox.view.S3Custom", {
 
-	oSalesOrderModel: {},
+	oSalesOrderModel: undefined,
 	_sContextPath: "",
+	oDataManager: undefined,
+	oModel: undefined,
+	
 
 	/**
 	 * Called when a controller is instantiated and its View controls (if available) are already created.
@@ -14,7 +17,7 @@ sap.ui.controller("cross.fnd.fiori.inbox.LoanAndDemoInbox.view.S3Custom", {
 			that = this;
 		
 		cross.fnd.fiori.inbox.view.S3.prototype.onInit.call(this);
-
+		
 		// Instantiate our own model for holding Sales Order Item details
 		this.oSalesOrderModel = new sap.ui.model.json.JSONModel({
 			items: [],
@@ -22,8 +25,12 @@ sap.ui.controller("cross.fnd.fiori.inbox.LoanAndDemoInbox.view.S3Custom", {
 			expenditureApproval: false,
 			busy: false,
 			userStatus: "",
-			expenditureMode: false
+			expenditureMode: false,
+			csAdminMode: false
 		});
+		
+		this.oDataManager = sap.ca.scfld.md.app.Application.getImpl().getComponent().getDataManager();
+		this.oModel = this.oDataManager.oModel;
 
 		view.setModel(this.oSalesOrderModel, "salesOrder");
 		
@@ -40,16 +47,15 @@ sap.ui.controller("cross.fnd.fiori.inbox.LoanAndDemoInbox.view.S3Custom", {
 		if (!aAttr || aAttr.length === 0 || !sKey) {
 			return "";
 		}
-		var key = "Name='" + sKey.toUpperCase() + "'",
-			oDataManager = sap.ca.scfld.md.app.Application.getImpl().getComponent().getDataManager(),
-			oModel = oDataManager.oModel;
+		var key = "Name='" + sKey.toUpperCase() + "'";
+		
 		var sPath = aAttr.find(function (s) {
 			return s.indexOf(key) > 0;
 		});
 		if (!sPath) {
 			return "";
 		}
-		return oModel.getProperty("/" + sPath + "/Value");
+		return this.oModel.getProperty("/" + sPath + "/Value");
 	},
 	getActualCreatedBy: function (aAttr) {
 		return this.getCustomAttribute(aAttr, "actualCreatedBy");
@@ -70,6 +76,10 @@ sap.ui.controller("cross.fnd.fiori.inbox.LoanAndDemoInbox.view.S3Custom", {
 	formatAbapDate: function (sDate) {
 		return sDate.substr(6,2) + "/" + sDate.substr(4,2) + "/" + sDate.substr(0,4);	
 	},
+	
+	getUserStatus: function() {
+		return this.getCustomAttribute(this.oModel.getProperty(this._sContextPath + "/CustomAttributeData"), "userStatus");
+	},
 
 	handleNavToDetail: function (e) {
 
@@ -78,7 +88,9 @@ sap.ui.controller("cross.fnd.fiori.inbox.LoanAndDemoInbox.view.S3Custom", {
 		this.salesOrderLoaded = this.loadSalesOrderItems(e);
 		
 		this.setSalesOrderTabSelected();
-
+		
+		this.setButtons();
+		
 	},
 
 	loadSalesOrderItems: function (e) {
@@ -93,9 +105,10 @@ sap.ui.controller("cross.fnd.fiori.inbox.LoanAndDemoInbox.view.S3Custom", {
 		
 		this._sContextPath = "/" + args.contextPath;
 		
-		var userStatus = this.getCustomAttribute(this.getView().getModel().getProperty(this._sContextPath + "/CustomAttributeData"), "userStatus");
+		var userStatus = this.getUserStatus();
 		model.setProperty("/userStatus", userStatus);
 		model.setProperty("/expenditureMode", userStatus === "EXPA");
+		model.setProperty("/csAdminMode", userStatus === "CSAC");
 		
 		return new Promise(function (res, rej) {
 			filters.push(new sap.ui.model.Filter({
@@ -140,10 +153,27 @@ sap.ui.controller("cross.fnd.fiori.inbox.LoanAndDemoInbox.view.S3Custom", {
 		});
 	},
 	
+	setButtons: function() {
+		var saveButton = {
+			action: "zSaveItems",
+			label: "Save Item Flags"
+		};
+		if (this.oSalesOrderModel.getProperty("/csAdminMode")) {
+			this.addAction(saveButton, this.saveItemFlags, this);
+		} else {
+			this.removeAction(saveButton);
+		}
+	},
+	
+	saveItemFlags: function() {
+		debugger;
+	},
+	
 	setSalesOrderTabSelected: function() {
 		var d = this.oTabBar.getItems()[4];
         this.oTabBar.setSelectedItem(d);
-	}
+	},
+	
 
 	/**
 	 * Similar to onAfterRendering, but this hook is invoked before the controller's View is re-rendered
@@ -522,39 +552,29 @@ sap.ui.controller("cross.fnd.fiori.inbox.LoanAndDemoInbox.view.S3Custom", {
 	//	_getActionHelper: function() {
 	//
 	//	}
-	,
 
 	extHookChangeFooterButtons: function (B) {
 		// Place your hook implementation code here 
-
-		var mapped = B.aButtonList.map(function (o) {
-			return o.sBtnTxt || o.sI18BtnTxt;
-		});
-
-		var remove = [];
-
-		for (var j = 0; j < mapped.length; j++) {
-			switch (mapped[j]) {
-			case "Approved":
-				B.oPositiveAction = B.aButtonList[j];
-				remove.push(j);
-				break;
-			case "Rejected":
-				B.oNegativeAction = B.aButtonList[j];
-				remove.push(j);
-				break;
-			case "XBUTSHOWLOG":
-			case "XBUT_OPEN":
-				break;
-			default:
-				remove.push(j);
-				break;
+		
+		B.aButtonList = B.aButtonList.filter(function(o) {
+			switch(o.sBtnTxt || o.sI18nBtnTxt) {
+				case "Approved":
+					B.oPositiveAction = o;
+					return false;
+				case "Rejected":
+					B.oNegativeAction = o;
+					return false;
+				default:
+					return false;
 			}
-
-		}
-
-		for (j = remove.length; j > -1; j--) {
-			B.aButtonList.splice(remove[j], 1);
+		});
+		
+		if (this.oSalesOrderModel.getProperty("/csAdminMode")) {
+			B.aButtonList.push({
+				actionId: "zSaveItems",
+				sBtnTxt: "Save Item Flags",
+				onBtnPressed: jQuery.proxy(this.saveItemFlags, this)
+			});
 		}
 
 	}

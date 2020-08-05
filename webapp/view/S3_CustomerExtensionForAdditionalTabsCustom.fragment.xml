@@ -21,6 +21,7 @@
 				<Column><Text text="Quantity"/></Column>
 				<!--<Column visible="{salesOrder>/expenditureMode}"><Text text="Standard Cost"/></Column>
 				<Column visible="{salesOrder>/expenditureMode}"><Text text="Ext Std Cost"/></Column>-->
+				<Column visible="{salesOrder>/csAdminMode}" hAlign="Center"><Text text="Add to DC Req"/></Column>
 			</columns>
 			<items>
 				<ColumnListItem>
@@ -29,6 +30,9 @@
 						<ObjectIdentifier title="{salesOrder>material}"/>
 						<Text text="{salesOrder>shortText}"/>
 						<ObjectNumber number="{salesOrder>reqQty}" unit="{salesOrder>salesUnit}"/>
+						
+						<CheckBox selected="{salesOrder>extProcureFlag}"/>
+						
 					</cells>
 				</ColumnListItem>
 			</items>
