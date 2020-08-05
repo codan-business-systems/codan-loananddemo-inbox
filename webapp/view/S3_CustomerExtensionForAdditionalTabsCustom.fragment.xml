@@ -31,7 +31,7 @@
 						<Text text="{salesOrder>shortText}"/>
 						<ObjectNumber number="{salesOrder>reqQty}" unit="{salesOrder>salesUnit}"/>
 						
-						<CheckBox selected="{salesOrder>extProcureFlag}"/>
+						<CheckBox selected="{salesOrder>externalProcureFlag}"/>
 						
 					</cells>
 				</ColumnListItem>

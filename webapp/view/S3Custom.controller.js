@@ -166,7 +166,37 @@ sap.ui.controller("cross.fnd.fiori.inbox.LoanAndDemoInbox.view.S3Custom", {
 	},
 	
 	saveItemFlags: function() {
-		debugger;
+		var model = this.oSalesOrderModel,
+			targetModel = this.getView().getModel("salesOrderERP");
+			
+		model.getProperty("/items").forEach(function(i) {
+			var key = "/" + targetModel.createKey("Items", i);
+			targetModel.setProperty(key + "/externalProcureFlag", i.externalProcureFlag);
+		});
+		
+		if (!targetModel.hasPendingChanges()) {
+			sap.m.MessageToast.show("No changes to save", {
+				duration: 5000
+			});
+			return;
+		}
+		
+		targetModel.setProperty("/busy", true);
+		
+		targetModel.submitChanges({
+			success: function(data) {
+				model.setProperty("/busy", false);
+				sap.m.MessageToast.show("Changes saved successfully", {
+					duration: 5000
+				});
+			},
+			error: function(err) {
+				model.setProperty("/busy", false);
+				sap.m.MessageBox.Error("Error saving item flags");
+				targetModel.resetPendingChanges();
+			}
+		});
+		
 	},
 	
 	setSalesOrderTabSelected: function() {
