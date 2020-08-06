@@ -4,7 +4,6 @@ sap.ui.controller("cross.fnd.fiori.inbox.LoanAndDemoInbox.view.S3Custom", {
 	_sContextPath: "",
 	oDataManager: undefined,
 	oModel: undefined,
-	
 
 	/**
 	 * Called when a controller is instantiated and its View controls (if available) are already created.
@@ -12,12 +11,12 @@ sap.ui.controller("cross.fnd.fiori.inbox.LoanAndDemoInbox.view.S3Custom", {
 	 * @memberOf cross.fnd.fiori.inbox.LoanAndDemoInbox.view.S3Custom
 	 */
 	onInit: function () {
-		
+
 		var view = this.getView(),
 			that = this;
-		
+
 		cross.fnd.fiori.inbox.view.S3.prototype.onInit.call(this);
-		
+
 		// Instantiate our own model for holding Sales Order Item details
 		this.oSalesOrderModel = new sap.ui.model.json.JSONModel({
 			items: [],
@@ -28,16 +27,16 @@ sap.ui.controller("cross.fnd.fiori.inbox.LoanAndDemoInbox.view.S3Custom", {
 			expenditureMode: false,
 			csAdminMode: false
 		});
-		
+
 		this.oDataManager = sap.ca.scfld.md.app.Application.getImpl().getComponent().getDataManager();
 		this.oModel = this.oDataManager.oModel;
 
 		view.setModel(this.oSalesOrderModel, "salesOrder");
-		
-		view.attachAfterRendering(function() {
+
+		view.attachAfterRendering(function () {
 			that.setSalesOrderTabSelected();
 		});
-		
+
 	},
 
 	/**
@@ -48,7 +47,7 @@ sap.ui.controller("cross.fnd.fiori.inbox.LoanAndDemoInbox.view.S3Custom", {
 			return "";
 		}
 		var key = "Name='" + sKey.toUpperCase() + "'";
-		
+
 		var sPath = aAttr.find(function (s) {
 			return s.indexOf(key) > 0;
 		});
@@ -72,12 +71,12 @@ sap.ui.controller("cross.fnd.fiori.inbox.LoanAndDemoInbox.view.S3Custom", {
 	getValidToDate: function (aAttr) {
 		return "Valid To: " + this.formatAbapDate(this.getCustomAttribute(aAttr, "validTo"));
 	},
-	
+
 	formatAbapDate: function (sDate) {
-		return sDate.substr(6,2) + "/" + sDate.substr(4,2) + "/" + sDate.substr(0,4);	
+		return sDate.substr(6, 2) + "/" + sDate.substr(4, 2) + "/" + sDate.substr(0, 4);
 	},
-	
-	getUserStatus: function() {
+
+	getUserStatus: function () {
 		return this.getCustomAttribute(this.oModel.getProperty(this._sContextPath + "/CustomAttributeData"), "userStatus");
 	},
 
@@ -86,11 +85,11 @@ sap.ui.controller("cross.fnd.fiori.inbox.LoanAndDemoInbox.view.S3Custom", {
 		cross.fnd.fiori.inbox.view.S3.prototype.handleNavToDetail.call(this, e);
 
 		this.salesOrderLoaded = this.loadSalesOrderItems(e);
-		
+
 		this.setSalesOrderTabSelected();
-		
+
 		this.setButtons();
-		
+
 	},
 
 	loadSalesOrderItems: function (e) {
@@ -100,16 +99,16 @@ sap.ui.controller("cross.fnd.fiori.inbox.LoanAndDemoInbox.view.S3Custom", {
 			args = e.getParameter("arguments"),
 			workitemId = args.InstanceID,
 			filters = [];
-			
+
 		model.setProperty("/busy", true);
-		
+
 		this._sContextPath = "/" + args.contextPath;
-		
+
 		var userStatus = this.getUserStatus();
 		model.setProperty("/userStatus", userStatus);
 		model.setProperty("/expenditureMode", userStatus === "EXPA");
 		model.setProperty("/csAdminMode", userStatus === "CSAC");
-		
+
 		return new Promise(function (res, rej) {
 			filters.push(new sap.ui.model.Filter({
 				path: "workitemId",
@@ -139,21 +138,21 @@ sap.ui.controller("cross.fnd.fiori.inbox.LoanAndDemoInbox.view.S3Custom", {
 						}
 
 					}
-					
-					model.setProperty("/busy", false); 
+
+					model.setProperty("/busy", false);
 
 					res();
 				},
 				error: function (err) {
-					model.setProperty("/busy", false); 
+					model.setProperty("/busy", false);
 					//TODO - what do these errors look like
 					rej();
 				}
 			});
 		});
 	},
-	
-	setButtons: function() {
+
+	setButtons: function () {
 		var saveButton = {
 			action: "zSaveItems",
 			label: "Save Item Flags"
@@ -164,46 +163,58 @@ sap.ui.controller("cross.fnd.fiori.inbox.LoanAndDemoInbox.view.S3Custom", {
 			this.removeAction(saveButton);
 		}
 	},
-	
-	saveItemFlags: function() {
+
+	saveItemFlags: function () {
 		var model = this.oSalesOrderModel,
 			targetModel = this.getView().getModel("salesOrderERP");
-			
-		model.getProperty("/items").forEach(function(i) {
-			var key = "/" + targetModel.createKey("Items", i);
-			targetModel.setProperty(key + "/externalProcureFlag", i.externalProcureFlag);
-		});
-		
-		if (!targetModel.hasPendingChanges()) {
-			sap.m.MessageToast.show("No changes to save", {
-				duration: 5000
+
+		return new Promise(function (res, rej) {
+			model.getProperty("/items").forEach(function (i) {
+				var key = "/" + targetModel.createKey("Items", i);
+				targetModel.setProperty(key + "/externalProcureFlag", i.externalProcureFlag);
 			});
-			return;
-		}
-		
-		targetModel.setProperty("/busy", true);
-		
-		targetModel.submitChanges({
-			success: function(data) {
-				model.setProperty("/busy", false);
-				sap.m.MessageToast.show("Changes saved successfully", {
+
+			if (!targetModel.hasPendingChanges()) {
+				sap.m.MessageToast.show("No changes to save", {
 					duration: 5000
 				});
-			},
-			error: function(err) {
-				model.setProperty("/busy", false);
-				sap.m.MessageBox.Error("Error saving item flags");
-				targetModel.resetPendingChanges();
+				res();
+				return;
 			}
+
+			targetModel.setProperty("/busy", true);
+
+			targetModel.submitChanges({
+				success: function (data) {
+					model.setProperty("/busy", false);
+					sap.m.MessageToast.show("Changes saved successfully", {
+						duration: 5000
+					});
+					res();
+				},
+				error: function (err) {
+					model.setProperty("/busy", false);
+					sap.m.MessageBox.Error("Error saving item flags");
+					targetModel.resetPendingChanges();
+					rej();
+				}
+			});
 		});
-		
+
 	},
-	
-	setSalesOrderTabSelected: function() {
+
+	setSalesOrderTabSelected: function () {
 		var d = this.oTabBar.getItems()[4];
-        this.oTabBar.setSelectedItem(d);
+		this.oTabBar.setSelectedItem(d);
 	},
 	
+	showDecisionDialog: function(sFunctionImportName, oDecision, bShowNote) {
+		var that = this,
+			args = arguments;
+		this.saveItemFlags().then(function() {
+			cross.fnd.fiori.inbox.view.S3.prototype.showDecisionDialog.call(that, args[0], args[1], args[2]);
+		});
+	},
 
 	/**
 	 * Similar to onAfterRendering, but this hook is invoked before the controller's View is re-rendered
@@ -585,20 +596,20 @@ sap.ui.controller("cross.fnd.fiori.inbox.LoanAndDemoInbox.view.S3Custom", {
 
 	extHookChangeFooterButtons: function (B) {
 		// Place your hook implementation code here 
-		
-		B.aButtonList = B.aButtonList.filter(function(o) {
-			switch(o.sBtnTxt || o.sI18nBtnTxt) {
-				case "Approved":
-					B.oPositiveAction = o;
-					return false;
-				case "Rejected":
-					B.oNegativeAction = o;
-					return false;
-				default:
-					return false;
+
+		B.aButtonList = B.aButtonList.filter(function (o) {
+			switch (o.sBtnTxt || o.sI18nBtnTxt) {
+			case "Approved":
+				B.oPositiveAction = o;
+				return false;
+			case "Rejected":
+				B.oNegativeAction = o;
+				return false;
+			default:
+				return false;
 			}
 		});
-		
+
 		if (this.oSalesOrderModel.getProperty("/csAdminMode")) {
 			B.aButtonList.push({
 				actionId: "zSaveItems",
