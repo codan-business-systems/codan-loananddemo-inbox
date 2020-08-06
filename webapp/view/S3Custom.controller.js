@@ -19,6 +19,7 @@ sap.ui.controller("cross.fnd.fiori.inbox.LoanAndDemoInbox.view.S3Custom", {
 
 		// Instantiate our own model for holding Sales Order Item details
 		this.oSalesOrderModel = new sap.ui.model.json.JSONModel({
+			header: undefined,
 			items: [],
 			itemsCount: 0,
 			expenditureApproval: false,
@@ -68,12 +69,23 @@ sap.ui.controller("cross.fnd.fiori.inbox.LoanAndDemoInbox.view.S3Custom", {
 	getStatusText: function (aAttr) {
 		return this.getCustomAttribute(aAttr, "userStatusText") + " (" + this.getCustomAttribute(aAttr, "userStatus") + ")";
 	},
+	getTotalCost: function (aAttr) {
+		return this.formatCurrency(this.getCustomAttribute(aAttr, "totalCost"));
+	},
 	getValidToDate: function (aAttr) {
 		return "Valid To: " + this.formatAbapDate(this.getCustomAttribute(aAttr, "validTo"));
 	},
 
 	formatAbapDate: function (sDate) {
 		return sDate.substr(6, 2) + "/" + sDate.substr(4, 2) + "/" + sDate.substr(0, 4);
+	},
+
+	formatCurrency: function (sValue) {
+		if (!sValue) {
+			return "";
+		}
+
+		return parseFloat(sValue).toFixed(2);
 	},
 
 	getUserStatus: function () {
@@ -125,6 +137,8 @@ sap.ui.controller("cross.fnd.fiori.inbox.LoanAndDemoInbox.view.S3Custom", {
 					if (data && data.results && data.results.length > 0) {
 						var salesOrder = data.results[0],
 							items = [];
+							
+						model.setProperty("/header", salesOrder);
 
 						if (salesOrder.ToItems && salesOrder.ToItems.results && salesOrder.ToItems.results.length > 0) {
 							items = salesOrder.ToItems.results.map(function (i) {
@@ -207,11 +221,11 @@ sap.ui.controller("cross.fnd.fiori.inbox.LoanAndDemoInbox.view.S3Custom", {
 		var d = this.oTabBar.getItems()[4];
 		this.oTabBar.setSelectedItem(d);
 	},
-	
-	showDecisionDialog: function(sFunctionImportName, oDecision, bShowNote) {
+
+	showDecisionDialog: function (sFunctionImportName, oDecision, bShowNote) {
 		var that = this,
 			args = arguments;
-		this.saveItemFlags().then(function() {
+		this.saveItemFlags().then(function () {
 			cross.fnd.fiori.inbox.view.S3.prototype.showDecisionDialog.call(that, args[0], args[1], args[2]);
 		});
 	},

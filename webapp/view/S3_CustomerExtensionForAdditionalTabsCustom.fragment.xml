@@ -12,6 +12,10 @@
 			<headerToolbar>
 				<Toolbar>
 					<Title text="Items: {salesOrder>/itemsCount}"/>
+					<ToolbarSpacer/>
+					<Label text="Total Cost: " visible="{salesOrder>/expenditureMode}"/>
+					<ObjectNumber visible="{salesOrder>/expenditureMode}"
+						number="{ path: 'salesOrder>/header/totalCost', formatter: '.formatCurrency' }" unit="AUD"/>
 				</Toolbar>
 			</headerToolbar>
 			<columns>
@@ -19,8 +23,8 @@
 				<Column><Text text="Part Number"/></Column>
 				<Column><Text text="Part Description"/></Column>
 				<Column><Text text="Quantity"/></Column>
-				<!--<Column visible="{salesOrder>/expenditureMode}"><Text text="Standard Cost"/></Column>
-				<Column visible="{salesOrder>/expenditureMode}"><Text text="Ext Std Cost"/></Column>-->
+				<Column visible="{salesOrder>/expenditureMode}"><Text text="Standard Cost"/></Column>
+				<Column visible="{salesOrder>/expenditureMode}"><Text text="Extended Cost"/></Column>
 				<Column visible="{salesOrder>/csAdminMode}" hAlign="Center"><Text text="Add to DC Req"/></Column>
 			</columns>
 			<items>
@@ -30,9 +34,9 @@
 						<ObjectIdentifier title="{salesOrder>material}"/>
 						<Text text="{salesOrder>shortText}"/>
 						<ObjectNumber number="{salesOrder>reqQty}" unit="{salesOrder>salesUnit}"/>
-						
+						<ObjectNumber number="{ path: 'salesOrder>standardCost', formatter: '.formatCurrency' }" unit="{salesOrder>currency}"/>
+						<ObjectNumber number="{ path: 'salesOrder>extendedCost', formatter: '.formatCurrency' }" unit="{salesOrder>currency}"/>
 						<CheckBox selected="{salesOrder>externalProcureFlag}"/>
-						
 					</cells>
 				</ColumnListItem>
 			</items>

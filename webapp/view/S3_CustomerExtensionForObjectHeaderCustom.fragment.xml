@@ -5,7 +5,8 @@
 		backgroundDesign="{path: 'detail&gt;/SapUiTheme', formatter:'cross.fnd.fiori.inbox.Conversions.formatterThemeBasedBackgroundColor'}"
 		title="{parts: [{path: 'detail&gt;/TaskTitle'}, {path: 'detail&gt;/CustomAttributeData'}], formatter: 'cross.fnd.fiori.inbox.Conversions.formatterTaskTitle'}"
 		titleLevel="H3" 
-		visible="{= !${detail&gt;/showGenericComponent}}">
+		visible="{= !${detail&gt;/showGenericComponent}}"
+		>
 		<attributes>
 			<ObjectAttribute id="ARuserName" text="{parts: [{path: 'CustomAttributeData'}], formatter:'.getActualCreatedBy' }"/>
 			<!--<ObjectAttribute text="{path: 'detail&gt;/CompletionDeadLine', formatter:'cross.fnd.fiori.inbox.Conversions.formatterDueDate'}"/>-->
