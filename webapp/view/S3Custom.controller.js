@@ -183,6 +183,11 @@ sap.ui.controller("cross.fnd.fiori.inbox.LoanAndDemoInbox.view.S3Custom", {
 			targetModel = this.getView().getModel("salesOrderERP");
 
 		return new Promise(function (res, rej) {
+			
+			if (model.getProperty("/csAdminMode")) {
+				res();
+				return;
+			}
 			model.getProperty("/items").forEach(function (i) {
 				var key = "/" + targetModel.createKey("Items", i);
 				targetModel.setProperty(key + "/externalProcureFlag", i.externalProcureFlag);
