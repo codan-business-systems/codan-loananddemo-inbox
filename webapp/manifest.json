@@ -88,7 +88,8 @@
 				"settings": {
 					"defaultOperationMode": "Server",
 					"defaultBindingMode": "OneWay",
-					"defaultCountMode": "Request"
+					"defaultCountMode": "Request",
+					"defaultUpdateMethod": "PUT"
 				},
 				"dataSource": "Z_SALES_ORDER_SRV",
 				"preload": true

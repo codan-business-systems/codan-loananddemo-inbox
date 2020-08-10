@@ -36,7 +36,12 @@
 						<ObjectNumber number="{salesOrder>reqQty}" unit="{salesOrder>salesUnit}"/>
 						<ObjectNumber number="{ path: 'salesOrder>standardCost', formatter: '.formatCurrency' }" unit="{salesOrder>currency}"/>
 						<ObjectNumber number="{ path: 'salesOrder>extendedCost', formatter: '.formatCurrency' }" unit="{salesOrder>currency}"/>
-						<CheckBox selected="{salesOrder>externalProcureFlag}"/>
+						<HBox>
+							<CheckBox selected="{salesOrder>externalProcureFlag}" select="onExternalProcureFlagSelected"/>
+							<Input type="Number" value="{salesOrder>externalProcureQty/value}" visible="{salesOrder>externalProcureFlag}"
+								   valueState="{salesOrder>externalProcureQty/valueState}"
+								   valueStateText="Enter a valid quantity"/> 
+						</HBox>
 					</cells>
 				</ColumnListItem>
 			</items>
