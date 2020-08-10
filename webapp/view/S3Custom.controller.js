@@ -223,7 +223,7 @@ sap.ui.define([
 
 					var key = "/" + targetModel.createKey("Items", i);
 					targetModel.setProperty(key + "/externalProcureFlag", i.externalProcureFlag);
-					targetModel.setProperty(key + "/externalProcureQty", i.externalProcureFlag ? i.externalProcureQty.value : "");
+					targetModel.setProperty(key + "/externalProcureQty", i.externalProcureFlag ? i.externalProcureQty.value.toString() : "");
 				});
 
 				model.refresh();
