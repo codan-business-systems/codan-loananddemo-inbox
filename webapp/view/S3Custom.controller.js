@@ -152,7 +152,7 @@ sap.ui.define([
 								items = salesOrder.ToItems.results.map(function (i) {
 									var result = Object.assign({}, i);
 									result.externalProcureQty = {
-										value: i.externalProcureQty,
+										value: parseFloat(i.externalProcureQty.toString()),
 										valueState: ValueState.None
 									};
 									return result;
@@ -177,6 +177,14 @@ sap.ui.define([
 					}
 				});
 			});
+		},
+		
+		onExternalProcureFlagSelected: function(oEvent) {
+			var path = oEvent.getSource().getBindingContext("salesOrder").getPath(),
+				model = this.oSalesOrderModel;
+				
+			model.setProperty(path + "/externalProcureQty/value",
+				oEvent.getParameter("selected") ? model.getProperty(path + "/reqQty") : "0");	
 		},
 
 		setButtons: function () {
