@@ -33,7 +33,7 @@
 						<ObjectIdentifier title="{salesOrder>itemId}"/>
 						<ObjectIdentifier title="{salesOrder>material}"/>
 						<Text text="{salesOrder>shortText}"/>
-						<ObjectNumber number="{salesOrder>reqQty}" unit="{salesOrder>salesUnit}"/>
+						<ObjectNumber number="{= ${salesOrder>/expenditureMode} ? ${salesOrder>externalProcureQty/value} : ${salesOrder>reqQty} }" unit="{salesOrder>salesUnit}"/>
 						<ObjectNumber number="{ path: 'salesOrder>standardCost', formatter: '.formatCurrency' }" unit="{salesOrder>currency}"/>
 						<ObjectNumber number="{ path: 'salesOrder>extendedCost', formatter: '.formatCurrency' }" unit="{salesOrder>currency}"/>
 						<HBox>
