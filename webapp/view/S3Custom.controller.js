@@ -30,11 +30,12 @@ sap.ui.define([
 				header: undefined,
 				items: [],
 				itemsCount: 0,
-				expenditureApproval: false,
 				busy: false,
 				userStatus: "",
 				expenditureMode: false,
-				csAdminMode: false
+				csAdminMode: false,
+				reviewMode: false,
+				hasReviewQuantities: false
 			});
 
 			this.oDataManager = sap.ca.scfld.md.app.Application.getImpl().getComponent().getDataManager();
@@ -127,7 +128,10 @@ sap.ui.define([
 			var userStatus = this.getUserStatus();
 			model.setProperty("/userStatus", userStatus);
 			model.setProperty("/expenditureMode", userStatus === "EXPA");
-			model.setProperty("/csAdminMode", userStatus === "CSAC");
+			var csAdminMode = userStatus === "CSAC";
+			model.setProperty("/csAdminMode", csAdminMode);
+			model.setProperty("/reviewMode", false);
+			model.setProperty("/hasReviewQuantities", false);
 
 			return new Promise(function (res, rej) {
 				filters.push(new sap.ui.model.Filter({
@@ -147,6 +151,7 @@ sap.ui.define([
 								items = [];
 
 							model.setProperty("/header", salesOrder);
+							model.setProperty("/originalGeneralComms", salesOrder.generalComms);
 
 							if (salesOrder.ToItems && salesOrder.ToItems.results && salesOrder.ToItems.results.length > 0) {
 								items = salesOrder.ToItems.results.map(function (i) {
@@ -155,6 +160,14 @@ sap.ui.define([
 										value: parseFloat(i.externalProcureQty.toString()),
 										valueState: ValueState.None
 									};
+									result.reviewQty = {
+										value: i.reviewQty ? parseFloat(i.reviewQty.toString()) : "",
+										valueState: ValueState.None
+									};
+
+									if (csAdminMode && Number(result.reviewQty.value) > 0) {
+										model.setProperty("/hasReviewQuantities", true);
+									}
 									return result;
 								});
 
@@ -164,6 +177,14 @@ sap.ui.define([
 
 							}
 
+						}
+
+						if (model.getProperty("/hasReviewQuantities")) {
+							items.forEach(function (i) {
+								if (!i.reviewQty.value && i.externalProcureFlag) {
+									i.reviewQty.value = i.externalProcureQty.value;
+								}
+							});
 						}
 
 						model.setProperty("/busy", false);
@@ -178,13 +199,13 @@ sap.ui.define([
 				});
 			});
 		},
-		
-		onExternalProcureFlagSelected: function(oEvent) {
+
+		onExternalProcureFlagSelected: function (oEvent) {
 			var path = oEvent.getSource().getBindingContext("salesOrder").getPath(),
 				model = this.oSalesOrderModel;
-				
+
 			model.setProperty(path + "/externalProcureQty/value",
-				oEvent.getParameter("selected") ? model.getProperty(path + "/reqQty") : "0");	
+				oEvent.getParameter("selected") ? model.getProperty(path + "/reqQty") : "0");
 		},
 
 		setButtons: function () {
@@ -192,39 +213,71 @@ sap.ui.define([
 				action: "zSaveItems",
 				label: "Save Item Flags"
 			};
-			if (this.oSalesOrderModel.getProperty("/csAdminMode")) {
-				this.addAction(saveButton, this.saveItemFlags, this);
+
+			this.addAction(saveButton, this.saveAll, this);
+
+		},
+
+		requestReview: function (oEvent) {
+			if (!this.oSalesOrderModel.getProperty("/reviewMode")) {
+				this._enableReviewMode();
 			} else {
-				this.removeAction(saveButton);
+				this._disableReviewMode();
 			}
 		},
 
-		saveItemFlags: function () {
+		saveAll: function (bApproving) {
 			var model = this.oSalesOrderModel,
 				targetModel = this.getView().getModel("salesOrderERP"),
-				error = false;
+				reviewMode = model.getProperty("/reviewMode"),
+				hasReviewQuantities = model.getProperty("/hasReviewQuantities"),
+				generalCommsText = model.getProperty("/header/generalComms"),
+				generalTextChanged = generalCommsText !== model.getProperty("/originalGeneralComms"),
+				error = false,
+				headerKey = "/" + targetModel.createKey("Headers", model.getProperty("/header"));
 
 			return new Promise(function (res, rej) {
 
-				if (!model.getProperty("/csAdminMode")) {
+				if (!model.getProperty("/csAdminMode") && !reviewMode && !generalTextChanged) {
 					res();
 					return;
 				}
-				model.getProperty("/items").forEach(function (i) {
+				
+				if (generalTextChanged) {
+					targetModel.setProperty(headerKey + "/generalComms", generalCommsText);
+				}
+				if (model.getProperty("/csAdminMode") || reviewMode) {
+					model.getProperty("/items").forEach(function (i) {
 
-					if (i.externalProcureFlag) {
-						if (Number(i.externalProcureQty.value <= 0) || Number(i.externalProcureQty.value) > Number(i.reqQty)) {
-							i.externalProcureQty.valueState = ValueState.Error;
-							error = true;
-						} else {
-							i.externalProcureQty.valueState = ValueState.None;
+						if (!reviewMode && i.externalProcureFlag) {
+							if (Number(i.externalProcureQty.value <= 0) || Number(i.externalProcureQty.value) > Number(i.reqQty)) {
+								i.externalProcureQty.valueState = ValueState.Error;
+								error = true;
+							} else {
+								i.externalProcureQty.valueState = ValueState.None;
+							}
 						}
-					}
 
-					var key = "/" + targetModel.createKey("Items", i);
-					targetModel.setProperty(key + "/externalProcureFlag", i.externalProcureFlag);
-					targetModel.setProperty(key + "/externalProcureQty", i.externalProcureFlag ? i.externalProcureQty.value.toString() : "");
-				});
+						if (reviewMode || hasReviewQuantities) {
+							if (i.reviewQty && (Number(i.reviewQty.value < 0) || Number(i.reviewQty.value) > Number(i.externalProcureQty.value))) {
+								i.reviewQty.valueState = ValueState.Error;
+								error = true;
+							} else {
+								i.reviewQty.valueState = ValueState.None;
+							}
+						}
+
+						var key = "/" + targetModel.createKey("Items", i);
+
+						if (!reviewMode) {
+							targetModel.setProperty(key + "/externalProcureFlag", i.externalProcureFlag);
+							targetModel.setProperty(key + "/externalProcureQty", i.externalProcureFlag ? i.externalProcureQty.value.toString() : "0");
+						} else {
+							targetModel.setProperty(key + "/reviewQty", i.reviewQty.value.toString() || i.externalProcureQty.value.toString() || "0");
+						}
+					});
+
+				}
 
 				model.refresh();
 
@@ -235,6 +288,13 @@ sap.ui.define([
 					});
 					rej && rej();
 					return;
+				} else if (bApproving && hasReviewQuantities) {
+					model.getProperty("/items").forEach(function (i) {
+						var key = "/" + targetModel.createKey("Items", i);
+						if (i.externalProcureFlag) {
+							targetModel.setProperty(key + "/externalProcureQty", i.reviewQty.value.toString || "0");
+						}
+					});
 				}
 
 				if (!targetModel.hasPendingChanges()) {
@@ -250,6 +310,10 @@ sap.ui.define([
 				targetModel.submitChanges({
 					success: function (data) {
 						model.setProperty("/busy", false);
+						
+						if (generalTextChanged) {
+							model.setProperty("/originalGeneralComms");
+						}
 
 						var resultMessage = utils.getBatchErrorMessage(data);
 						if (!resultMessage) {
@@ -281,10 +345,66 @@ sap.ui.define([
 
 		showDecisionDialog: function (sFunctionImportName, oDecision, bShowNote) {
 			var that = this,
-				args = arguments;
-			this.saveItemFlags().then(function () {
+				args = arguments,
+				approving = oDecision.Nature === "POSITIVE";
+			this.saveAll(approving).then(function () {
 				cross.fnd.fiori.inbox.view.S3.prototype.showDecisionDialog.call(that, args[0], args[1], args[2]);
 			});
+		},
+
+		_disableReviewMode: function () {
+			this.oSalesOrderModel.setProperty("/reviewMode", false);
+
+			var reviewBtn = this.oHeaderFooterOptions.buttonList.find(function (b) {
+				return b.actionId === "zRequestReview";
+			});
+
+			if (reviewBtn) {
+				reviewBtn.sBtnTxt = "Request Review";
+			}
+
+			this.oHeaderFooterOptions.oNegativeAction = Object.assign(this.standardRejectButton, {});
+			this.oHeaderFooterOptions.oPositiveAction = Object.assign(this.standardAcceptButton, {});
+
+			this.refreshHeaderFooterOptions();
+		},
+
+		_enableReviewMode: function () {
+
+			this.oSalesOrderModel.setProperty("/reviewMode", true);
+			var reviewBtn = this.oHeaderFooterOptions.buttonList.find(function (b) {
+				return b.actionId === "zRequestReview";
+			});
+
+			if (reviewBtn) {
+				reviewBtn.sBtnTxt = "Cancel";
+			}
+
+			this.standardRejectButton = Object.assign(this.oHeaderFooterOptions.oNegativeAction, {});
+			this.standardAcceptButton = Object.assign(this.oHeaderFooterOptions.oPositiveAction, {});
+
+			this.oHeaderFooterOptions.oNegativeAction = {
+				sBtnTxt: "Send for Review",
+				onBtnPressed: jQuery.proxy(this._sendForReview, this)
+			};
+
+			this.oHeaderFooterOptions.oPositiveAction = null;
+
+			this.refreshHeaderFooterOptions();
+
+		},
+
+		_sendForReview: function () {
+			var decisions = this.oDataManager.getDataFromCache("DecisionOptions", this.oContext.getObject()),
+				decision = decisions.find(function (d) {
+					return d.DecisionKey === "0003";
+				});
+
+			if (!decision) {
+				MessageBox.error("Error in process flow");
+			}
+
+			this.showDecisionDialog(this.oDataManager.FUNCTION_IMPORT_DECISION, decision, true);
 		},
 
 		/**
@@ -681,11 +801,17 @@ sap.ui.define([
 				}
 			});
 
-			if (this.oSalesOrderModel.getProperty("/csAdminMode")) {
+			B.aButtonList.push({
+				actionId: "zSaveItems",
+				sBtnTxt: "Save",
+				onBtnPressed: jQuery.proxy(this.saveAll, this)
+			});
+
+			if (this.oSalesOrderModel.getProperty("/expenditureMode")) {
 				B.aButtonList.push({
-					actionId: "zSaveItems",
-					sBtnTxt: "Save Items",
-					onBtnPressed: jQuery.proxy(this.saveItemFlags, this)
+					actionId: "zRequestReview",
+					sBtnTxt: "Request Review",
+					onBtnPressed: jQuery.proxy(this.requestReview, this)
 				});
 			}
 

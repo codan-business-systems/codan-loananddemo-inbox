@@ -6,6 +6,10 @@
 							<core:Fragment fragmentName="cross.fnd.fiori.inbox.frag.ObjectLinks" type="XML"/>
 						</core:ExtensionPoint>
 					</IconTabFilter>-->
+	<IconTabFilter xmlns="sap.m" id="ZGeneralComms" icon="sap-icon://discussion" tooltip="General Communications" key="ZGeneralComms">
+		<TextArea id="generalComms" width="100%" growing="false" rows="25" wrapping="Hard"
+				  value="{salesOrder>/header/generalComms}"/>
+	</IconTabFilter>
 					
 	<IconTabFilter xmlns="sap.m" id="ZSalesItems" icon="sap-icon://activities" tooltip="Sales Order Items" count="{salesOrder>/itemsCount}" key="ZSalesOrderItems">
 		<Table id="salesItems" items="{salesOrder>/items}" width="auto" class="sapUiResponsiveMargin" noDataText="No Valid Line Items" busy="{salesOrder>/busy}">
@@ -25,7 +29,9 @@
 				<Column><Text text="Quantity"/></Column>
 				<Column visible="{salesOrder>/expenditureMode}"><Text text="Standard Cost"/></Column>
 				<Column visible="{salesOrder>/expenditureMode}"><Text text="Extended Cost"/></Column>
-				<Column visible="{salesOrder>/csAdminMode}" hAlign="Center"><Text text="Add to DC Req"/></Column>
+				<Column visible="{salesOrder>/csAdminMode}" hAlign="Center"><Text text="{= ${salesOrder>/hasReviewQuantities} ? 'Requested Qty' : 'Add to DC Req' }"/></Column>
+				<Column visible="{salesOrder>/reviewMode}" hAlign="Center"><Text text="Change Quantity"/></Column>
+				<Column visible="{salesOrder>/hasReviewQuantities}" hAlign="Center"><Text text="Modify Quantity"/></Column>
 			</columns>
 			<items>
 				<ColumnListItem>
@@ -34,14 +40,18 @@
 						<ObjectIdentifier title="{salesOrder>material}"/>
 						<Text text="{salesOrder>shortText}"/>
 						<ObjectNumber number="{= ${salesOrder>/expenditureMode} ? ${salesOrder>externalProcureQty/value} : ${salesOrder>reqQty} }" unit="{salesOrder>salesUnit}"/>
-						<ObjectNumber number="{ path: 'salesOrder>standardCost', formatter: '.formatCurrency' }" unit="{salesOrder>currency}"/>
-						<ObjectNumber number="{ path: 'salesOrder>extendedCost', formatter: '.formatCurrency' }" unit="{salesOrder>currency}"/>
+						<ObjectNumber number="{ path: 'salesOrder>standardCost', formatter: '.formatCurrency' }" unit="{salesOrder>standardCostCurrency}"/>
+						<ObjectNumber number="{ path: 'salesOrder>extendedCost', formatter: '.formatCurrency' }" unit="{salesOrder>standardCostCurrency}"/>
 						<HBox>
-							<CheckBox selected="{salesOrder>externalProcureFlag}" select="onExternalProcureFlagSelected"/>
+							<CheckBox selected="{salesOrder>externalProcureFlag}" select="onExternalProcureFlagSelected" visible="{= !${salesOrder>/hasReviewQuantities} }"/>
 							<Input type="Number" value="{salesOrder>externalProcureQty/value}" visible="{salesOrder>externalProcureFlag}"
-								   valueState="{salesOrder>externalProcureQty/valueState}"
+								   valueState="{salesOrder>externalProcureQty/valueState}" editable="{= !${salesOrder>/hasReviewQuantities} }"
 								   valueStateText="Enter a valid quantity"/> 
 						</HBox>
+						<Input type="Number" value="{salesOrder>reviewQty/value}" valueState="{salesOrder>reviewQty/valueState}"
+											 valueStateText="Enter a valid quantity"/>
+						<Input type="Number" value="{salesOrder>reviewQty/value}" valueState="{salesOrder>reviewQty/valueState}"
+											 valueStateText="Enter a valid quantity"/>
 					</cells>
 				</ColumnListItem>
 			</items>
