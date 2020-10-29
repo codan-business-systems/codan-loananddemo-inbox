@@ -48,6 +48,13 @@ sap.ui.define([
 			});
 
 		},
+		
+		createGenericCommentsComponent: function(v) {
+			cross.fnd.fiori.inbox.view.S3.prototype.createGenericCommentsComponent.call(this, v);
+			
+			/* Set the input control to invisible to make the tab read only */
+			this.oGenericCommentsComponent.getAggregation("rootControl").getContent()[0].setVisible(false);
+		},
 
 		/**
 		 * Gave up trying to include these in their own formatter file
@@ -110,7 +117,7 @@ sap.ui.define([
 			this.setSalesOrderTabSelected();
 
 			this.setButtons();
-
+			
 		},
 
 		loadSalesOrderItems: function (e) {
