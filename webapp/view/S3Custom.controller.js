@@ -797,10 +797,10 @@ sap.ui.define([
 
 			B.aButtonList = B.aButtonList.filter(function (o) {
 				switch (o.sBtnTxt || o.sI18nBtnTxt) {
-				case "Approved":
+				case "Approve":
 					B.oPositiveAction = o;
 					return false;
-				case "Rejected":
+				case "Reject":
 					B.oNegativeAction = o;
 					return false;
 				default:
@@ -821,6 +821,9 @@ sap.ui.define([
 					onBtnPressed: jQuery.proxy(this.requestReview, this)
 				});
 			}
+			
+			B.oJamOptions = {};
+			B.oEmailSettings = {};
 
 		}
 	});
