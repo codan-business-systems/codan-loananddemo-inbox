@@ -242,6 +242,8 @@ sap.ui.define([
 				generalTextChanged = generalCommsText !== model.getProperty("/originalGeneralComms"),
 				error = false,
 				headerKey = "/" + targetModel.createKey("Headers", model.getProperty("/header"));
+				
+			sap.ui.core.BusyIndicator.show(100);
 
 			return new Promise(function (res, rej) {
 
@@ -290,6 +292,7 @@ sap.ui.define([
 
 				if (error) {
 					targetModel.resetChanges();
+					sap.ui.core.BusyIndicator.hide();
 					MessageBox.error("Correct DC Req quantity errors and try again", {
 						duration: 10000
 					});
@@ -308,6 +311,7 @@ sap.ui.define([
 					MessageToast.show("No changes to save", {
 						duration: 5000
 					});
+					sap.ui.core.BusyIndicator.hide();
 					res();
 					return;
 				}
@@ -327,15 +331,18 @@ sap.ui.define([
 							MessageToast.show("Changes saved successfully", {
 								duration: 5000
 							});
+							sap.ui.core.BusyIndicator.hide();
 							res();
 						} else {
 							targetModel.resetChanges();
+							sap.ui.core.BusyIndicator.hide();
 							MessageBox.error("Error saving item details\n\n" + resultMessage);
 							rej && rej();
 						}
 					},
 					error: function (err) {
 						model.setProperty("/busy", false);
+						sap.ui.core.BusyIndicator.hide();
 						sap.m.MessageBox.Error("Error saving item flags");
 						targetModel.resetChanges();
 						rej && rej();
