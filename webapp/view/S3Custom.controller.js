@@ -248,6 +248,7 @@ sap.ui.define([
 			return new Promise(function (res, rej) {
 
 				if (!model.getProperty("/csAdminMode") && !reviewMode && !generalTextChanged) {
+					sap.ui.core.BusyIndicator.hide();
 					res();
 					return;
 				}
