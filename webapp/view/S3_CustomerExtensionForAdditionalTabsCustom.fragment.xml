@@ -32,6 +32,7 @@
 				<Column visible="{salesOrder>/csAdminMode}" hAlign="Center"><Text text="{= ${salesOrder>/hasReviewQuantities} ? 'Requested Qty' : 'Add to DC Req' }"/></Column>
 				<Column visible="{salesOrder>/reviewMode}" hAlign="Center"><Text text="Change Quantity"/></Column>
 				<Column visible="{salesOrder>/hasReviewQuantities}" hAlign="Center"><Text text="Modify Quantity"/></Column>
+				<Column width="10rem" visible="{salesOrder>/csAdminMode}" hAlign="Center"><Text text="Date Required"/></Column>
 			</columns>
 			<items>
 				<ColumnListItem>
@@ -52,6 +53,12 @@
 											 valueStateText="Enter a valid quantity"/>
 						<Input type="Number" value="{salesOrder>reviewQty/value}" valueState="{salesOrder>reviewQty/valueState}"
 											 valueStateText="Enter a valid quantity"/>
+						<HBox visible="{salesOrder>externalProcureFlag}">
+							<DatePicker value="{salesOrder>dateRequired/value}"  editable="{= !${salesOrder>/hasReviewQuantities} }"
+									valueState="{salesOrder>dateRequired/valueState}" valueStateText="{salesOrder>dateRequired/valueStateText}"
+									minDate="{ path: '', formatter: '.getTodaysDate' }" valueFormat="yyyyMMdd" />
+							<Button icon="sap-icon://activate" tooltip="Apply Date to All Ticked Items" press="setRequiredDateForAll"/>
+						</HBox>
 					</cells>
 				</ColumnListItem>
 			</items>

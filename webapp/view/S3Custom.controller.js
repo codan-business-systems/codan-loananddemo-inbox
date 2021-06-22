@@ -2,8 +2,9 @@ sap.ui.define([
 	"sap/m/MessageBox",
 	"sap/ui/core/ValueState",
 	"cross/fnd/fiori/inbox/LoanAndDemoInbox/model/utils",
-	"sap/m/MessageToast"
-], function (MessageBox, ValueState, utils, MessageToast) {
+	"sap/m/MessageToast",
+	"sap/ui/core/format/DateFormat"
+], function (MessageBox, ValueState, utils, MessageToast, DateFormat) {
 	"use strict";
 
 	return sap.ui.controller("cross.fnd.fiori.inbox.LoanAndDemoInbox.view.S3Custom", {
@@ -40,6 +41,10 @@ sap.ui.define([
 
 			this.oDataManager = sap.ca.scfld.md.app.Application.getImpl().getComponent().getDataManager();
 			this.oModel = this.oDataManager.oModel;
+			
+			this.abapDateFormatter = DateFormat.getDateInstance({
+					pattern: "yyyyMMdd"
+				});
 
 			view.setModel(this.oSalesOrderModel, "salesOrder");
 
@@ -48,10 +53,10 @@ sap.ui.define([
 			});
 
 		},
-		
-		createGenericCommentsComponent: function(v) {
+
+		createGenericCommentsComponent: function (v) {
 			cross.fnd.fiori.inbox.view.S3.prototype.createGenericCommentsComponent.call(this, v);
-			
+
 			/* Set the input control to invisible to make the tab read only */
 			this.oGenericCommentsComponent.getAggregation("rootControl").getContent()[0].setVisible(false);
 		},
@@ -88,6 +93,9 @@ sap.ui.define([
 		getTotalCost: function (aAttr) {
 			return this.formatCurrency(this.getCustomAttribute(aAttr, "totalCost"));
 		},
+		getTodaysDate: function () {
+			return new Date();
+		},
 		getValidToDate: function (aAttr) {
 			return "Valid To: " + this.formatAbapDate(this.getCustomAttribute(aAttr, "validTo"));
 		},
@@ -117,7 +125,7 @@ sap.ui.define([
 			this.setSalesOrderTabSelected();
 
 			this.setButtons();
-			
+
 		},
 
 		loadSalesOrderItems: function (e) {
@@ -126,7 +134,8 @@ sap.ui.define([
 				erpModel = this.getView().getModel("salesOrderERP"),
 				args = e.getParameter("arguments"),
 				workitemId = args.InstanceID,
-				filters = [];
+				filters = [],
+				that = this;
 
 			model.setProperty("/busy", true);
 
@@ -172,6 +181,12 @@ sap.ui.define([
 										valueState: ValueState.None
 									};
 
+									result.dateRequired = {
+										value: that.abapDateFormatter.format(i.dateRequired),
+										valueState: ValueState.None,
+										valueStateText: ""
+									};
+
 									if (csAdminMode && Number(result.reviewQty.value) > 0) {
 										model.setProperty("/hasReviewQuantities", true);
 									}
@@ -214,6 +229,20 @@ sap.ui.define([
 			model.setProperty(path + "/externalProcureQty/value",
 				oEvent.getParameter("selected") ? model.getProperty(path + "/reqQty") : "0");
 		},
+		
+		setRequiredDateForAll: function(oEvent) {
+			var path = oEvent.getSource().getBindingContext("salesOrder").getPath(),
+				model = this.oSalesOrderModel,
+				targetDate = model.getProperty(path + "/dateRequired/value"),
+				items = model.getProperty("/items");
+				
+			items.forEach(function(i) {
+				if (i.externalProcureFlag) {
+					i.dateRequired.value = targetDate;
+				}	
+			});
+			this.oSalesOrderModel.refresh();
+		},
 
 		setButtons: function () {
 			var saveButton = {
@@ -241,8 +270,9 @@ sap.ui.define([
 				generalCommsText = model.getProperty("/header/generalComms"),
 				generalTextChanged = generalCommsText !== model.getProperty("/originalGeneralComms"),
 				error = false,
-				headerKey = "/" + targetModel.createKey("Headers", model.getProperty("/header"));
-				
+				headerKey = "/" + targetModel.createKey("Headers", model.getProperty("/header")),
+				that = this;
+
 			sap.ui.core.BusyIndicator.show(100);
 
 			return new Promise(function (res, rej) {
@@ -252,7 +282,7 @@ sap.ui.define([
 					res();
 					return;
 				}
-				
+
 				if (generalTextChanged) {
 					targetModel.setProperty(headerKey + "/generalComms", generalCommsText);
 				}
@@ -266,6 +296,12 @@ sap.ui.define([
 							} else {
 								i.externalProcureQty.valueState = ValueState.None;
 							}
+							
+							if (!i.dateRequired.value) {
+								i.dateRequired.valueState = ValueState.Error;
+								error = true;
+								i.dateRequired.valueStateText = "Enter a valid date";
+							} 
 						}
 
 						if (reviewMode || hasReviewQuantities) {
@@ -282,6 +318,9 @@ sap.ui.define([
 						if (!reviewMode) {
 							targetModel.setProperty(key + "/externalProcureFlag", i.externalProcureFlag);
 							targetModel.setProperty(key + "/externalProcureQty", i.externalProcureFlag ? i.externalProcureQty.value.toString() : "0");
+							if (i.externalProcureFlag) {
+								targetModel.setProperty(key + "/dateRequired", new Date(that.abapDateFormatter.parse(i.dateRequired.value).setHours(12)));
+							}
 						} else {
 							targetModel.setProperty(key + "/reviewQty", i.reviewQty.value.toString() || i.externalProcureQty.value.toString() || "0");
 						}
@@ -322,7 +361,7 @@ sap.ui.define([
 				targetModel.submitChanges({
 					success: function (data) {
 						model.setProperty("/busy", false);
-						
+
 						if (generalTextChanged) {
 							model.setProperty("/originalGeneralComms");
 						}
@@ -829,7 +868,7 @@ sap.ui.define([
 					onBtnPressed: jQuery.proxy(this.requestReview, this)
 				});
 			}
-			
+
 			B.oJamOptions = {};
 			B.oEmailSettings = {};
 
