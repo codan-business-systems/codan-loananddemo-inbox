@@ -44,7 +44,8 @@
 						<ObjectNumber number="{ path: 'salesOrder>standardCost', formatter: '.formatCurrency' }" unit="{salesOrder>standardCostCurrency}"/>
 						<ObjectNumber number="{ path: 'salesOrder>extendedCost', formatter: '.formatCurrency' }" unit="{salesOrder>standardCostCurrency}"/>
 						<HBox>
-							<CheckBox selected="{salesOrder>externalProcureFlag}" select="onExternalProcureFlagSelected" visible="{= !${salesOrder>/hasReviewQuantities} }"/>
+							<CheckBox selected="{salesOrder>externalProcureFlag}" select="onExternalProcureFlagSelected" visible="{= !${salesOrder>/hasReviewQuantities} }"
+							enabled="{= ${salesOrder>ItemCategory} !== 'TATX'}"/>
 							<Input type="Number" value="{salesOrder>externalProcureQty/value}" visible="{salesOrder>externalProcureFlag}"
 								   valueState="{salesOrder>externalProcureQty/valueState}" editable="{= !${salesOrder>/hasReviewQuantities} }"
 								   valueStateText="Enter a valid quantity"/> 
